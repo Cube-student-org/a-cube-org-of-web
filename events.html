@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>活动与赛事 · xssz 魔方非官方组织</title>
+<meta name="description" content="xssz 魔方非官方组织办过的赛事与活动记录。按「比赛 → 项目 → 成绩」三级记录，数据实时读自赛事数据库。">
+<link rel="stylesheet" href="css/style.css">
+<!-- 首访门禁：必须在 <head> 内同步执行，才能赶在首帧之前把内容藏住。
+     放在样式表之后，脚本会等 CSS 就绪才跑，标记一定先于第一次绘制生效。
+     机制与理由见 js/consent.js 顶部注释。 -->
+<script src="js/consent.js"></script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%235B57D1'/%3E%3Ctext x='16' y='22' font-family='sans-serif' font-size='15' font-weight='700' fill='white' text-anchor='middle'%3Exz%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+
+<a class="skip-link" href="#main">跳到主要内容</a>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="index.html">
+      <span class="brand-mark" aria-hidden="true">xz</span>
+      <span class="brand-text">
+        <span class="brand-name">xssz 魔方非官方组织</span>
+        <span class="brand-sub">Unofficial Rubik's Cube Organization</span>
+      </span>
+    </a>
+    <button class="nav-toggle" id="nav-toggle" type="button"
+            aria-label="展开导航菜单" aria-expanded="false" aria-controls="site-nav">
+      <span class="nav-toggle-bar" aria-hidden="true"></span>
+    </button>
+    <nav class="nav" id="site-nav" aria-label="主导航">
+      <a class="nav-link" href="index.html" data-nav="index.html">首页</a>
+      <a class="nav-link" href="about.html" data-nav="about.html">关于我们</a>
+      <a class="nav-link" href="charter.html" data-nav="charter.html">章程与制度</a>
+      <a class="nav-link" href="events.html" data-nav="events.html">活动与赛事</a>
+      <a class="nav-link" href="results.html" data-nav="results.html">赛事成绩</a>
+      <div class="nav-auth" id="nav-auth"></div>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <div class="page-head">
+    <div class="wrap">
+      <p class="breadcrumb"><a href="index.html">首页</a><span>/</span>活动与赛事</p>
+      <h1>活动与赛事</h1>
+      <p class="lead">
+        我们办过的比赛都记录在这里。数据实时读自赛事数据库，
+        不是手写维护的列表——页面上的每一条都能在成绩页里查到对应的单次成绩。
+      </p>
+    </div>
+  </div>
+
+  <!-- ============ 记录方式说明 ============ -->
+  <section class="section-tight section-alt">
+    <div class="wrap wrap-narrow">
+      <div class="prose">
+        <p>
+          成绩按<strong>「比赛 → 项目 → 单次成绩」</strong>三级记录。一场比赛下设若干项目，
+          每个项目在数据库里是独立的参赛单元——同一场比赛的「三阶」和另一场比赛的「三阶」
+          并不是同一个单元，因为参赛人和成绩都不同。
+        </p>
+        <p>
+          每个项目可以有自己的规则配置：记录哪些数据（是否记录步数、转动效率、录像）、
+          成绩怎么算（单次最好、去头尾平均、最少步数、低于某秒数的比例等）。
+          因此不同项目的成绩口径可能不同，比较时请留意项目类型。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 赛事列表 ============ -->
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 class="section-title">赛事记录</h2>
+        <p class="section-desc" id="events-summary">正在读取…</p>
+      </div>
+      <div id="events-list"></div>
+    </div>
+  </section>
+
+  <!-- ============ CTA ============ -->
+  <section class="section section-alt">
+    <div class="wrap">
+      <div class="grid grid-2">
+        <div>
+          <h2 class="section-title">想看具体成绩</h2>
+          <p class="section-desc">
+            成绩页可以按比赛和项目筛选，查看选手排行与每一次单次成绩的明细。
+            页面上只显示已通过审核的成绩：待审与已驳回的成绩不会对外公开。
+          </p>
+          <div class="btn-row mt-5">
+            <a class="btn btn-primary" href="results.html">进入成绩页</a>
+          </div>
+        </div>
+        <div id="status-card-events"></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-name" id="foot-name">xssz 魔方非官方组织</div>
+        <p class="footer-note" id="foot-note"></p>
+      </div>
+      <div>
+        <div class="faint">相关链接</div>
+        <div class="footer-links mt-3" id="foot-links"></div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="foot-year">2026</span> <span id="foot-name-en"></span></span>
+      <span>本站由运营委员会维护</span>
+    </div>
+  </div>
+</footer>
+
+<div id="alert-box" class="alert" hidden></div>
+
+<script src="js/config.js"></script>
+<script src="js/session.js"></script>
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/content.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/site.js"></script>
+<script src="js/page-events.js"></script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>登录 · xssz 魔方非官方组织</title>
+<meta name="description" content="成员登录入口。账号由管理员创建，不开放自助注册。">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="css/style.css">
+<!-- 首访门禁：必须在 <head> 内同步执行，才能赶在首帧之前把内容藏住。
+     放在样式表之后，脚本会等 CSS 就绪才跑，标记一定先于第一次绘制生效。
+     机制与理由见 js/consent.js 顶部注释。 -->
+<script src="js/consent.js"></script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%235B57D1'/%3E%3Ctext x='16' y='22' font-family='sans-serif' font-size='15' font-weight='700' fill='white' text-anchor='middle'%3Exz%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+
+<a class="skip-link" href="#main">跳到主要内容</a>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="index.html">
+      <span class="brand-mark" aria-hidden="true">xz</span>
+      <span class="brand-text">
+        <span class="brand-name">xssz 魔方非官方组织</span>
+        <span class="brand-sub">Unofficial Rubik's Cube Organization</span>
+      </span>
+    </a>
+    <button class="nav-toggle" id="nav-toggle" type="button"
+            aria-label="展开导航菜单" aria-expanded="false" aria-controls="site-nav">
+      <span class="nav-toggle-bar" aria-hidden="true"></span>
+    </button>
+    <nav class="nav" id="site-nav" aria-label="主导航">
+      <a class="nav-link" href="index.html" data-nav="index.html">首页</a>
+      <a class="nav-link" href="about.html" data-nav="about.html">关于我们</a>
+      <a class="nav-link" href="charter.html" data-nav="charter.html">章程与制度</a>
+      <a class="nav-link" href="events.html" data-nav="events.html">活动与赛事</a>
+      <a class="nav-link" href="results.html" data-nav="results.html">赛事成绩</a>
+      <div class="nav-auth" id="nav-auth"></div>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <section class="section">
+    <div class="wrap wrap-narrow">
+
+      <div class="section-head">
+        <h1 class="section-title">成员登录</h1>
+        <p class="section-desc">
+          登录后可以进入管理台。普通访客不需要登录——
+          章程、赛事与成绩都是公开的。
+        </p>
+      </div>
+
+      <div class="card">
+        <form id="login-form" novalidate>
+          <label class="field">
+            <span class="label">用户ID</span>
+            <input class="input" id="auth-code" name="code" type="text"
+                   placeholder="u00000001" autocomplete="username"
+                   autocapitalize="off" spellcheck="false" required>
+            <span class="hint">用户ID 不是昵称。形如 u00000001，由管理员创建账号时分配。</span>
+          </label>
+
+          <label class="field">
+            <span class="label">密码</span>
+            <input class="input" id="auth-password" name="password" type="password"
+                   autocomplete="current-password" required>
+          </label>
+
+          <!-- 验证码：本地生成与校验。定位说明写在界面小字里，避免夸大它的作用 -->
+          <div class="field">
+            <label class="label" for="auth-captcha">验证码</label>
+            <div class="captcha-row">
+              <input class="input" id="auth-captcha" name="captcha" type="text"
+                     inputmode="latin" autocomplete="off" autocapitalize="characters"
+                     spellcheck="false" maxlength="6" placeholder="照抄右侧字符">
+              <button class="captcha-img" type="button" id="captcha-refresh"
+                      aria-label="点击更换验证码">
+                <canvas id="captcha-canvas" role="img"
+                        aria-label="验证码图片，点击可更换"></canvas>
+              </button>
+            </div>
+            <span class="hint">
+              看不清就点图片换一张。验证码在本机生成与校验，用来挡住最简单的脚本尝试；
+              真正的防护在服务端（登录限流）与数据库权限，不在这一张图上。
+            </span>
+          </div>
+
+          <!-- 成员须知：勾了才让登。这是告知与确认，不是权限边界 -->
+          <div class="agree-box">
+            <label class="agree-check">
+              <input type="checkbox" id="auth-agree">
+              <span id="agree-label-text">我已阅读并同意《成员须知》</span>
+            </label>
+            <details class="agree-details">
+              <summary id="agree-summary">展开读《成员须知》</summary>
+              <div class="agree-body" id="member-terms-body"></div>
+            </details>
+          </div>
+
+          <div id="auth-error" class="form-error" role="alert" hidden></div>
+
+          <div class="btn-row mt-5">
+            <button class="btn btn-primary" type="submit" id="login-submit">登录</button>
+            <a class="btn btn-quiet" href="index.html">返回首页</a>
+          </div>
+        </form>
+      </div>
+
+      <div class="prose mt-6">
+        <p>
+          <strong>没有账号？</strong>本组织不开放自助注册。账号一律由管理员在管理台的用户管理中创建，
+          原因是这属于组织内部成员账号，不是开放平台。
+        </p>
+        <p>
+          <strong>浏览器不接触数据库。</strong>登录与数据请求全部经由组织的后端服务转发，
+          权限由数据库本身强制。因此本地不会、也不应该保存任何数据库地址或密钥。
+        </p>
+        <p>
+          如果登录后菜单里的功能没有立刻出现，切回本页面标签再切回来即可——
+          角色信息会在窗口重新获得焦点时从数据库同步。
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-name" id="foot-name">xssz 魔方非官方组织</div>
+        <p class="footer-note" id="foot-note"></p>
+      </div>
+      <div>
+        <div class="faint">相关链接</div>
+        <div class="footer-links mt-3" id="foot-links"></div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="foot-year">2026</span> <span id="foot-name-en"></span></span>
+      <span>本站由运营委员会维护</span>
+    </div>
+  </div>
+</footer>
+
+<div id="alert-box" class="alert" hidden></div>
+
+<script src="js/config.js"></script>
+<script src="js/session.js"></script>
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/content.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/site.js"></script>
+<!-- 验证码与协议面板都是登录页专有的，其他页面不需要，故只在这里引入 -->
+<script src="js/captcha.js"></script>
+<script src="js/page-login.js"></script>
+</body>
+</html>

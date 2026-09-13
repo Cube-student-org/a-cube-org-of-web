@@ -1,539 +1,207 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>魔方比赛成绩管理系统</title>
-
-    <!-- Tabulator：主题必须放在 style.css 之前，同权重冲突才会由项目样式胜出
-         （materialize 主题给单元格 15px 内边距，比紧凑行高高出一截，会裁掉文字） -->
-    <link href="https://unpkg.com/tabulator-tables@5.6.0/dist/css/tabulator_materialize.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
-
-    <script src="https://unpkg.com/tabulator-tables@5.6.0/dist/js/tabulator.min.js"></script>
-
-    <!-- 项目配置定义（window.EventConfig） -->
-    <script src="event-config.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>xssz 魔方非官方组织 · 官网</title>
+<meta name="description" content="xssz 魔方非官方组织官网。一个由初中生自发组织的魔方团体：一部 19 章 164 条的临时章程，8 个常设机构，以及自己运转的赛事与成绩记录。">
+<link rel="stylesheet" href="css/style.css">
+<!-- 首访门禁：必须在 <head> 内同步执行，才能赶在首帧之前把内容藏住。
+     放在样式表之后，脚本会等 CSS 就绪才跑，标记一定先于第一次绘制生效。
+     机制与理由见 js/consent.js 顶部注释。 -->
+<script src="js/consent.js"></script>
+<!-- 图标用内联 SVG data URI，避免多一次网络请求，也避免外部 CDN 在国内失效 -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%235B57D1'/%3E%3Ctext x='16' y='22' font-family='sans-serif' font-size='15' font-weight='700' fill='white' text-anchor='middle'%3Exz%3C/text%3E%3C/svg%3E">
 </head>
 <body>
 
-<div class="app">
+<a class="skip-link" href="#main">跳到主要内容</a>
 
-    <!-- ============ 页头 ============ -->
-    <header class="app__header">
-        <div class="app__brand">
-            <span class="app__logo" aria-hidden="true">🎲</span>
-            <div>
-                <h1 class="app__title">魔方比赛成绩管理系统</h1>
-                <p class="app__subtitle">层级项目 · 算法配置 · 分级权限</p>
-            </div>
-        </div>
-    </header>
+<!-- ============ 页头（每个页面都写全，不靠 JS 注入，保证无 JS 时导航仍可用） ============ -->
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="index.html">
+      <span class="brand-mark" aria-hidden="true">xz</span>
+      <span class="brand-text">
+        <span class="brand-name">xssz 魔方非官方组织</span>
+        <span class="brand-sub">Unofficial Rubik's Cube Organization</span>
+      </span>
+    </a>
 
-    <!-- ============ 身份条 ============ -->
-    <section class="auth">
-        <div id="auth-login-form" class="auth__group">
-            <span class="auth__who">未登录 · 匿名访问（仅可查公开成绩）</span>
-            <form onsubmit="guard(this.querySelector('button[type=submit]'), signIn); return false;">
-                <label class="sr-only" for="auth-code">用户ID</label>
-                <input class="input" type="text" id="auth-code" placeholder="用户ID（如 u00000001，不是昵称）" autocomplete="username">
-                <label class="sr-only" for="auth-password">密码</label>
-                <span class="pw-wrap">
-                    <input class="input" type="password" id="auth-password" placeholder="密码" autocomplete="current-password">
-                    <button type="button" class="pw-toggle" aria-label="显示密码" aria-pressed="false" onclick="togglePassword('auth-password', this)">👁</button>
-                </span>
-                <button type="submit" class="btn btn--sm">登录</button>
-            </form>
-            <p id="auth-error" class="form-error" role="alert" hidden></p>
-        </div>
-        <div id="auth-user-info" class="auth__user" style="display:none">
-            <span class="auth__who">👋 <strong id="auth-user-name"></strong></span>
-            <span id="auth-role-badge" class="role-badge role-anon" aria-label="当前角色"></span>
-            <button type="button" class="btn btn--sm btn--ghost" onclick="guard(this, signOutNow)">退出登录</button>
-        </div>
-    </section>
+    <button class="nav-toggle" id="nav-toggle" type="button"
+            aria-label="展开导航菜单" aria-expanded="false" aria-controls="site-nav">
+      <span class="nav-toggle-bar" aria-hidden="true"></span>
+    </button>
 
-    <!-- ============ 导航（按职责分组） ============ -->
-    <nav class="nav">
-        <div class="nav__group">
-            <span class="nav__label" data-minrole="editor">数据维护</span>
-            <div class="tab" data-minrole="editor" onclick="switchTab('competitions', this)">🏆 比赛管理</div>
-            <div class="tab" data-minrole="editor" onclick="switchTab('events', this)">⚙️ 项目管理</div>
-            <div class="tab" data-minrole="editor" onclick="switchTab('participants', this)">👤 选手管理</div>
-        </div>
-        <div class="nav__group">
-            <span class="nav__label" data-minrole="anon">成绩</span>
-            <div class="tab" data-minrole="editor" onclick="switchTab('attempts', this)">⏱️ 成绩录入</div>
-            <div class="tab active" data-minrole="anon" onclick="switchTab('stats', this)">📊 成绩查询</div>
-        </div>
-        <div class="nav__group">
-            <span class="nav__label" data-minrole="user">治理</span>
-            <div class="tab" data-minrole="user" onclick="switchTab('profile', this)">🗂️ 我的档案</div>
-            <div class="tab" data-minrole="reviewer" onclick="switchTab('review', this)">✅ 审核管理</div>
-            <div class="tab" data-minrole="admin" onclick="switchTab('users', this)">👥 用户管理</div>
-        </div>
+    <nav class="nav" id="site-nav" aria-label="主导航">
+      <a class="nav-link" href="index.html" data-nav="index.html">首页</a>
+      <a class="nav-link" href="about.html" data-nav="about.html">关于我们</a>
+      <a class="nav-link" href="charter.html" data-nav="charter.html">章程与制度</a>
+      <a class="nav-link" href="events.html" data-nav="events.html">活动与赛事</a>
+      <a class="nav-link" href="results.html" data-nav="results.html">赛事成绩</a>
+      <div class="nav-auth" id="nav-auth"></div>
     </nav>
+  </div>
+</header>
 
-    <main class="main">
+<main id="main">
 
-        <!-- ============ 比赛管理 ============ -->
-        <section id="tab-competitions" class="tab-pane">
-            <div class="layout">
-                <div class="panel">
-                    <div class="panel__head">
-                        <h2 class="panel__title">添加比赛</h2>
-                    </div>
-                    <div class="field">
-                        <label for="comp-number">比赛编号</label>
-                        <input class="input" type="text" id="comp-number" placeholder="如：WCA-2024-001">
-                    </div>
-                    <div class="field">
-                        <label for="comp-name">比赛名称</label>
-                        <input class="input" type="text" id="comp-name" placeholder="如：2024城市魔方赛">
-                    </div>
-                    <div class="field">
-                        <label for="comp-date">比赛日期</label>
-                        <input class="input" type="date" id="comp-date">
-                    </div>
-                    <div class="field">
-                        <label for="comp-location">地点</label>
-                        <input class="input" type="text" id="comp-location" placeholder="如：北京">
-                    </div>
-                    <div class="field">
-                        <label for="comp-notes">备注</label>
-                        <textarea class="input" id="comp-notes" rows="3"></textarea>
-                    </div>
-                    <div class="actions">
-                        <button class="btn" onclick="guard(this, addCompetition)">➕ 添加比赛</button>
-                    </div>
-                </div>
+  <!-- ============ Hero ============ -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow">
+          <span class="tag tag-warn">当前状态 · 非官方</span>
+          <span>初中生自发组织</span>
+        </span>
+        <h1>xssz 魔方非官方组织</h1>
+        <p class="lead">
+          我们是一群玩魔方的初中生。我们为自己写了一份 19 章、164 条的临时章程，
+          把权力拆给 8 个常设机构互相约束；也用同一套规则，记录下每一次拧出的成绩。
+        </p>
+        <div class="btn-row">
+          <a class="btn btn-primary" href="charter.html">读我们的章程</a>
+          <a class="btn btn-ghost" href="results.html">看赛事成绩</a>
+        </div>
+      </div>
 
-                <div>
-                    <div class="panel">
-                        <div class="panel__head">
-                            <h2 class="panel__title">比赛列表</h2>
-                        </div>
-                        <div class="table-scroll"><div id="competitions-table"></div></div>
-                    </div>
+      <aside class="charter-badge" aria-labelledby="badge-label">
+        <div class="charter-badge-label" id="badge-label">临时章程</div>
+        <div class="charter-badge-num">
+          <span id="stat-articles">164</span><span class="charter-badge-unit">条</span>
+        </div>
+        <div class="charter-badge-meta">
+          共 <span id="stat-chapters">19</span> 章 · 严谨版 / 通俗版 双文本<br>
+          每条条文带永久编号（内容哈希）
+        </div>
+        <div class="btn-row mt-4">
+          <a class="btn btn-quiet btn-sm" href="charter.html">查看目录与全文 →</a>
+        </div>
+      </aside>
+    </div>
+  </section>
 
-                    <div class="panel">
-                        <div class="panel__head">
-                            <h2 class="panel__title">为比赛配置项目</h2>
-                            <span class="panel__note">一个比赛可挂多个项目</span>
-                        </div>
-                        <div class="field">
-                            <label for="config-competition">选择比赛</label>
-                            <select class="input" id="config-competition" onchange="loadConfigCompetitionEvents()"></select>
-                        </div>
-                        <div class="field">
-                            <label for="config-event">添加项目</label>
-                            <select class="input" id="config-event"></select>
-                        </div>
-                        <div class="actions">
-                            <button class="btn btn--success" onclick="guard(this, addEventToCompetition)">➕ 添加到比赛</button>
-                        </div>
-                        <hr class="rule">
-                        <div id="config-competition-events" class="empty">请先选择比赛</div>
-                    </div>
-                </div>
-            </div>
-        </section>
+  <!-- ============ 关键数字 ============ -->
+  <section class="section-tight">
+    <div class="wrap">
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-num" id="stat-articles-2">164</div>
+          <div class="stat-label">条章程条文</div>
+          <div class="stat-hint">临时版本</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" id="stat-chapters-2">19</div>
+          <div class="stat-label">章</div>
+          <div class="stat-hint">含总则与附则</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" id="stat-institutions">8</div>
+          <div class="stat-label">个常设机构</div>
+          <div class="stat-hint">另有 2 个行政部门</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" id="stat-competitions">—</div>
+          <div class="stat-label">场已记录赛事</div>
+          <div class="stat-hint">实时读取</div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-        <!-- ============ 项目管理 ============ -->
-        <section id="tab-events" class="tab-pane">
-            <div class="layout">
-                <div class="panel">
-                    <div class="panel__head">
-                        <h2 class="panel__title">添加项目</h2>
-                        <span class="panel__note">新建时的初始算法</span>
-                    </div>
-                    <div class="field">
-                        <label for="event-code">项目代码</label>
-                        <input class="input" type="text" id="event-code" placeholder="如：3x3-ao5">
-                    </div>
-                    <div class="field">
-                        <label for="event-name">项目名称</label>
-                        <input class="input" type="text" id="event-name" placeholder="如：三阶 - AO5">
-                    </div>
-                    <div class="field">
-                        <label for="event-desc">描述</label>
-                        <input class="input" type="text" id="event-desc" placeholder="如：三阶速拧最近5次平均">
-                    </div>
-                    <div class="field">
-                        <label for="event-parent">父项目（可选）</label>
-                        <select class="input" id="event-parent">
-                            <option value="">-- 顶级项目（无父项目）--</option>
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label for="event-algo-type">算法类型</label>
-                        <select class="input" id="event-algo-type" onchange="toggleEventAlgoFields()">
-                            <option value="single">单次最佳</option>
-                            <option value="average" selected>平均（去头尾）</option>
-                            <option value="mean">算术平均</option>
-                            <option value="best_of">最佳 of N</option>
-                            <option value="sub">SUB-X</option>
-                        </select>
-                    </div>
-                    <div class="field" id="event-algo-extra">
-                        <label for="event-window-size">窗口大小（次数）</label>
-                        <input class="input" type="number" id="event-window-size" min="1" value="5">
-                    </div>
-                    <div class="field" id="event-trim-field">
-                        <label for="event-trim-count">去头尾数量</label>
-                        <input class="input" type="number" id="event-trim-count" min="0" value="1">
-                    </div>
-                    <div class="field">
-                        <label for="event-is-lower-better">越小越好？</label>
-                        <select class="input" id="event-is-lower-better">
-                            <option value="true" selected>是</option>
-                            <option value="false">否</option>
-                        </select>
-                    </div>
-                    <div class="actions">
-                        <button class="btn" onclick="guard(this, addEvent)">➕ 添加项目</button>
-                    </div>
-                </div>
+  <!-- ============ 核心特征 ============ -->
+  <section class="section section-alt">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 class="section-title">为什么要有这么多机构</h2>
+        <p class="section-desc">
+          章程里的机构设置不是为了好看。每一条分权设计，都是为了回答同一个问题：
+          怎么防止这个组织变成某一个人的。
+        </p>
+      </div>
+      <div class="grid grid-4" id="principles"></div>
+    </div>
+  </section>
 
-                <div>
-                    <div class="panel">
-                        <div class="panel__head">
-                            <h2 class="panel__title">项目列表</h2>
-                        </div>
-                        <div class="table-scroll"><div id="events-table"></div></div>
-                    </div>
+  <!-- ============ 最近赛事 ============ -->
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 class="section-title">最近赛事</h2>
+        <p class="section-desc">直接读自赛事数据库，不做人工维护。</p>
+      </div>
+      <div id="recent-events"></div>
+      <div class="btn-row mt-5">
+        <a class="btn btn-ghost btn-sm" href="events.html">全部赛事与活动 →</a>
+      </div>
+    </div>
+  </section>
 
-                    <div class="panel config-panel">
-                        <div class="panel__head">
-                            <h2 class="panel__title">项目配置查看 / 编辑</h2>
-                            <span class="panel__note">作用于已存在的项目</span>
-                        </div>
-                        <div class="field">
-                            <label for="config-event-select">选择项目</label>
-                            <select class="input" id="config-event-select" onchange="loadEventConfigToForm()"></select>
-                        </div>
+  <!-- ============ 组织形态（只说明「有组织」，机构清单留给章程） ============ -->
+  <section class="section section-alt">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 class="section-title">我们是有组织的</h2>
+      </div>
+      <div id="org-chart-home"></div>
+      <div class="btn-row mt-5">
+        <a class="btn btn-ghost btn-sm" href="about.html#chart">我们是怎么组织起来的 →</a>
+        <a class="btn btn-ghost btn-sm" href="charter.html#toc-section">完整机构设置 →</a>
+      </div>
+    </div>
+  </section>
 
-                        <div class="config-panel__section config-panel__section--tpl">
-                            <div class="config-panel__title">📋 从模板快速填充</div>
-                            <select class="input" id="config-template-select" onchange="onConfigTemplateSelected()">
-                                <option value="">-- 选择模板（自动填充下方表单）--</option>
-                            </select>
-                            <p class="hint" id="template-desc" style="margin-top:6px;"></p>
-                        </div>
+  <!-- ============ 收尾 CTA ============ -->
+  <section class="section">
+    <div class="wrap">
+      <div class="grid grid-2">
+        <div>
+          <h2 class="section-title">想读章程全文</h2>
+          <p class="section-desc">
+            临时章程目前是 19 章 164 条，同时存在严谨版与通俗版两种文本：
+            通俗版以例子为核心，是日常陈述与执行的默认版本；严谨版表述精确，
+            用于正式决议、对外文件与争议裁决。章程页可以按章折叠阅读，也能按条号或关键词检索。
+          </p>
+          <div class="btn-row mt-5">
+            <a class="btn btn-primary" href="charter.html">进入章程页</a>
+          </div>
+        </div>
+        <div id="status-card-home"></div>
+      </div>
+    </div>
+  </section>
 
-                        <div class="config-panel__section">
-                            <div class="config-panel__title">⚙️ 项目配置（event_config）</div>
-                            <div id="event-config-fields"></div>
-                        </div>
+</main>
 
-                        <div class="config-panel__section config-panel__section--algo">
-                            <div class="config-panel__title">🧮 算法配置（algorithm_config）</div>
-                            <div id="algo-config-fields-inner"></div>
-                        </div>
+<!-- ============ 页脚 ============ -->
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-name" id="foot-name">xssz 魔方非官方组织</div>
+        <p class="footer-note" id="foot-note"></p>
+      </div>
+      <div>
+        <div class="faint">相关链接</div>
+        <div class="footer-links mt-3" id="foot-links"></div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="foot-year">2026</span> <span id="foot-name-en"></span></span>
+      <span>本站由运营委员会维护</span>
+    </div>
+  </div>
+</footer>
 
-                        <details class="advanced">
-                            <summary>🔍 查看 / 编辑原始 JSON（高级）</summary>
-                            <textarea class="input" id="event-config-json" rows="10" placeholder="配置 JSON 将自动同步到此处"></textarea>
-                        </details>
+<div id="alert-box" class="alert" hidden></div>
 
-                        <div class="actions">
-                            <button class="btn btn--success" onclick="guard(this, saveConfigFromForm)">💾 保存配置</button>
-                            <button class="btn btn--ghost" onclick="onLoadDefaultConfigToForm()">📋 加载默认配置</button>
-                            <button class="btn btn--ghost" onclick="onExportConfigJSON()">📤 导出 JSON</button>
-                            <button class="btn btn--ghost" onclick="onImportConfigJSON()">📥 导入 JSON</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ============ 选手管理 ============ -->
-        <section id="tab-participants" class="tab-pane">
-            <div class="layout">
-                <div class="panel">
-                    <div class="panel__head">
-                        <h2 class="panel__title">添加选手</h2>
-                    </div>
-                    <div class="field">
-                        <label for="participant-name">选手姓名</label>
-                        <input class="input" type="text" id="participant-name" placeholder="如：张三">
-                    </div>
-                    <div class="field">
-                        <label for="participant-wca">WCA ID（可选）</label>
-                        <input class="input" type="text" id="participant-wca" placeholder="如：2019ZHAN01">
-                    </div>
-                    <div class="field">
-                        <label for="participant-notes">备注</label>
-                        <textarea class="input" id="participant-notes" rows="3"></textarea>
-                    </div>
-                    <div class="actions">
-                        <button class="btn" onclick="guard(this, addParticipant)">➕ 添加选手</button>
-                    </div>
-                </div>
-
-                <div class="panel">
-                    <div class="panel__head">
-                        <h2 class="panel__title">选手列表</h2>
-                    </div>
-                    <div class="table-scroll"><div id="participants-table"></div></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ============ 成绩录入 ============ -->
-        <section id="tab-attempts" class="tab-pane">
-            <div class="layout layout--wide">
-                <div class="panel">
-                    <div class="panel__head">
-                        <h2 class="panel__title">录入成绩</h2>
-                    </div>
-                    <div class="field">
-                        <label for="attempt-competition">选择比赛</label>
-                        <select class="input" id="attempt-competition" onchange="loadCompetitionEventsForAttempt()"></select>
-                    </div>
-                    <div class="field">
-                        <label for="attempt-event">选择项目</label>
-                        <select class="input" id="attempt-event"></select>
-                    </div>
-                    <div class="field">
-                        <label for="attempt-participant">选择选手</label>
-                        <select class="input" id="attempt-participant"></select>
-                    </div>
-                    <div class="field">
-                        <label for="attempt-id">尝试编号</label>
-                        <input class="input" type="text" id="attempt-id" placeholder="如：1 或 A 或 Round1-1">
-                    </div>
-                    <div class="field">
-                        <label for="attempt-cube-type">魔方类型</label>
-                        <select class="input" id="attempt-cube-type" onchange="toggleSmartFields()">
-                            <option value="non_smart" selected>非智能魔方</option>
-                            <option value="smart">智能魔方</option>
-                        </select>
-                    </div>
-
-                    <div id="smart-fields" class="cond-group cond-group--smart" style="display:none">
-                        <div class="field">
-                            <label for="attempt-move-count">步数（智能魔方自动记录）</label>
-                            <input class="input" type="number" id="attempt-move-count" placeholder="如：45">
-                        </div>
-                        <div class="field">
-                            <label for="attempt-tps">TPS（智能魔方自动计算）</label>
-                            <input class="input" type="number" id="attempt-tps" step="0.001" placeholder="如：2.500">
-                        </div>
-                    </div>
-
-                    <div id="non-smart-fields" class="cond-group cond-group--manual">
-                        <div class="field">
-                            <label for="attempt-video">录像链接（可选）</label>
-                            <input class="input" type="text" id="attempt-video" placeholder="https://...">
-                        </div>
-                    </div>
-
-                    <div class="field">
-                        <label for="attempt-time">复原时间（秒）</label>
-                        <input class="input" type="number" id="attempt-time" step="0.001" placeholder="如：12.345">
-                        <span class="hint">DNF 填 -1，DNS 填 -2，也可在下方选择惩罚</span>
-                    </div>
-                    <div class="field">
-                        <label for="attempt-penalty">状态 / 惩罚</label>
-                        <select class="input" id="attempt-penalty">
-                            <option value="none" selected>正常完成</option>
-                            <option value="+2">+2 秒</option>
-                            <option value="dnf">DNF（未完成）</option>
-                            <option value="dns">DNS（未开始）</option>
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label for="attempt-notes">备注</label>
-                        <textarea class="input" id="attempt-notes" rows="2"></textarea>
-                    </div>
-                    <div class="actions">
-                        <button class="btn" onclick="guard(this, addAttempt)">💾 保存成绩</button>
-                    </div>
-                </div>
-
-                <div class="panel">
-                    <div class="panel__head">
-                        <h2 class="panel__title">最近成绩</h2>
-                        <span class="panel__note">最新 50 条</span>
-                    </div>
-                    <div class="table-scroll"><div id="attempts-table"></div></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ============ 成绩查询 ============ -->
-        <section id="tab-stats" class="tab-pane active">
-            <div class="layout layout--wide">
-                <div class="panel">
-                    <div class="panel__head">
-                        <h2 class="panel__title">查询条件</h2>
-                    </div>
-                    <div class="field">
-                        <label for="view-competition">选择比赛</label>
-                        <select class="input" id="view-competition" onchange="loadCompetitionEventsForView()"></select>
-                    </div>
-                    <div class="field">
-                        <label for="view-event">选择项目</label>
-                        <select class="input" id="view-event"></select>
-                    </div>
-                    <div class="actions">
-                        <button class="btn btn--success" onclick="guard(this, loadViewData)">📊 加载数据</button>
-                    </div>
-                    <p class="hint" style="margin-top:12px;">仅统计审核通过的成绩。</p>
-                </div>
-
-                <div class="panel">
-                    <div class="panel__head">
-                        <h2 class="panel__title">查询结果</h2>
-                    </div>
-                    <div id="stats-summary"></div>
-                    <div class="table-scroll"><div id="view-table"></div></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ============ 我的档案 ============ -->
-        <section id="tab-profile" class="tab-pane">
-            <div class="layout">
-                <div>
-                    <div class="panel">
-                        <div class="panel__head">
-                            <h2 class="panel__title">📇 账号信息</h2>
-                        </div>
-                        <div class="account-meta">
-                            <span id="my-role-badge" class="role-badge role-anon" aria-label="我的角色"></span>
-                            <span class="account-meta__since" id="my-created-at"></span>
-                        </div>
-                        <div class="field">
-                            <label for="my-user-code">用户 ID（唯一标识，不可修改）</label>
-                            <input class="input" type="text" id="my-user-code" readonly>
-                        </div>
-                        <div class="field">
-                            <label for="my-nickname">昵称</label>
-                            <input class="input" type="text" id="my-nickname" placeholder="显示给其他人的名字">
-                        </div>
-                        <div class="actions">
-                            <button class="btn" onclick="guard(this, saveNickname)">💾 保存昵称</button>
-                        </div>
-                    </div>
-
-                    <div class="panel">
-                        <div class="panel__head">
-                            <h2 class="panel__title">🔑 修改密码</h2>
-                        </div>
-                        <div class="field">
-                            <label for="my-new-password">新密码（至少 6 位）</label>
-                            <span class="pw-wrap">
-                                <input class="input" type="password" id="my-new-password" placeholder="新密码" autocomplete="new-password">
-                                <button type="button" class="pw-toggle" aria-label="显示密码" aria-pressed="false" onclick="togglePassword('my-new-password', this)">👁</button>
-                            </span>
-                        </div>
-                        <div class="field">
-                            <label for="my-confirm-password">确认新密码</label>
-                            <input class="input" type="password" id="my-confirm-password" placeholder="再输入一次" autocomplete="new-password">
-                        </div>
-                        <div class="actions">
-                            <button class="btn" onclick="guard(this, changeMyPassword)">🔑 修改密码</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="panel">
-                    <div class="panel__head">
-                        <h2 class="panel__title">🏆 我的比赛记录</h2>
-                        <span class="panel__note">按比赛汇总</span>
-                    </div>
-                    <div class="table-scroll"><div id="my-attempts-table"></div></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ============ 审核管理 ============ -->
-        <section id="tab-review" class="tab-pane">
-            <div class="panel">
-                <div class="panel__head">
-                    <h2 class="panel__title">✅ 待审核成绩</h2>
-                    <span class="panel__note" id="review-count">暂无待审核成绩</span>
-                </div>
-                <div class="table-scroll"><div id="review-table"></div></div>
-            </div>
-        </section>
-
-        <!-- ============ 用户管理 ============ -->
-        <section id="tab-users" class="tab-pane">
-            <div class="panel">
-                <div class="panel__head">
-                    <h2 class="panel__title">➕ 创建账号</h2>
-                    <span class="panel__note">仅管理员</span>
-                </div>
-                <div class="layout layout--wide">
-                    <div class="field">
-                        <label for="new-user-code">用户 ID（登录用，字母/数字/下划线，≤32 位）</label>
-                        <input class="input" type="text" id="new-user-code" placeholder="如 u00000002（与登录用的用户ID 一致）">
-                    </div>
-                    <div class="field">
-                        <label for="new-user-nickname">昵称</label>
-                        <input class="input" type="text" id="new-user-nickname" placeholder="显示名">
-                    </div>
-                    <div class="field">
-                        <label for="new-user-password">初始密码（至少 6 位）</label>
-                        <span class="pw-wrap">
-                            <input class="input" type="password" id="new-user-password" placeholder="至少 6 位" autocomplete="new-password">
-                            <button type="button" class="pw-toggle" aria-label="显示密码" aria-pressed="false" onclick="togglePassword('new-user-password', this)">👁</button>
-                        </span>
-                    </div>
-                    <div class="field">
-                        <label for="new-user-role">角色</label>
-                        <select class="input" id="new-user-role">
-                            <option value="user">普通用户</option>
-                            <option value="editor">编辑员</option>
-                            <option value="reviewer">审核员</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="actions">
-                    <button class="btn btn--success" onclick="guard(this, createAccount)">➕ 创建账号</button>
-                </div>
-            </div>
-
-            <div class="panel">
-                <div class="panel__head">
-                    <h2 class="panel__title">👥 用户角色管理</h2>
-                </div>
-                <p class="hint" style="margin-bottom:16px;">
-                    角色由低到高：普通用户 → 编辑员 → 审核员 → 管理员。管理员只能修改低于自己的角色，
-                    且可授予的角色也必须低于管理员；管理员身份不可再授予。修改后对应用户下次操作即生效，无需重新登录。
-                </p>
-                <div class="table-scroll"><div id="users-table"></div></div>
-            </div>
-        </section>
-
-    </main>
-</div>
-
-<!-- 操作反馈（Toast） -->
-<div id="alert-box" class="alert" role="status" aria-live="polite"></div>
-
-<!-- ============ 脚本 ============ -->
 <script src="js/config.js"></script>
 <script src="js/session.js"></script>
 <script src="js/api.js"></script>
-<script src="js/supabase-client.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/content.js"></script>
 <script src="js/auth.js"></script>
-<script src="js/ui-helpers.js"></script>
-<script src="js/data-loader.js"></script>
-<script src="js/data-saver.js"></script>
-<script src="js/event-config-ui.js"></script>
-<script src="js/admin.js"></script>
-<script src="js/profile.js"></script>
-<script>
-    // 应用启动：探测 Worker → 恢复会话 → 加载数据（已无手动「连接数据库」步骤）
-    // 兜底捕获：启动阶段的异常若无人接管，只会静默失败（仅控制台报错、界面空白）
-    bootApp().catch(function (err) {
-        console.error('启动失败：', err);
-        showAlert('启动失败：' + (err && err.message ? err.message : '未知错误'), 'error');
-    });
-</script>
+<script src="js/site.js"></script>
+<script src="js/page-home.js"></script>
 </body>
 </html>
