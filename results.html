@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>赛事成绩 · xssz 魔方非官方组织</title>
+<meta name="description" content="xssz 魔方非官方组织的公开赛事成绩查询：按比赛与项目筛选，查看选手排行与每一次单次成绩明细。仅显示已通过审核的成绩。">
+<link rel="stylesheet" href="css/style.css">
+<!-- 首访门禁：必须在 <head> 内同步执行，才能赶在首帧之前把内容藏住。
+     放在样式表之后，脚本会等 CSS 就绪才跑，标记一定先于第一次绘制生效。
+     机制与理由见 js/consent.js 顶部注释。 -->
+<script src="js/consent.js"></script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%235B57D1'/%3E%3Ctext x='16' y='22' font-family='sans-serif' font-size='15' font-weight='700' fill='white' text-anchor='middle'%3Exz%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+
+<a class="skip-link" href="#main">跳到主要内容</a>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="index.html">
+      <span class="brand-mark" aria-hidden="true">xz</span>
+      <span class="brand-text">
+        <span class="brand-name">xssz 魔方非官方组织</span>
+        <span class="brand-sub">Unofficial Rubik's Cube Organization</span>
+      </span>
+    </a>
+    <button class="nav-toggle" id="nav-toggle" type="button"
+            aria-label="展开导航菜单" aria-expanded="false" aria-controls="site-nav">
+      <span class="nav-toggle-bar" aria-hidden="true"></span>
+    </button>
+    <nav class="nav" id="site-nav" aria-label="主导航">
+      <a class="nav-link" href="index.html" data-nav="index.html">首页</a>
+      <a class="nav-link" href="about.html" data-nav="about.html">关于我们</a>
+      <a class="nav-link" href="charter.html" data-nav="charter.html">章程与制度</a>
+      <a class="nav-link" href="events.html" data-nav="events.html">活动与赛事</a>
+      <a class="nav-link" href="results.html" data-nav="results.html">赛事成绩</a>
+      <div class="nav-auth" id="nav-auth"></div>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <div class="page-head">
+    <div class="wrap">
+      <p class="breadcrumb"><a href="index.html">首页</a><span>/</span>赛事成绩</p>
+      <h1>赛事成绩</h1>
+      <p class="lead">
+        任何人都可以查询，不需要登录。页面上只出现<strong>已通过审核</strong>的成绩——
+        待审与已驳回的成绩不会对外公开。
+      </p>
+    </div>
+  </div>
+
+  <!-- ============ 筛选 ============ -->
+  <section class="section-tight">
+    <div class="wrap">
+      <div class="filters">
+        <label class="field">
+          <span class="label">比赛</span>
+          <select class="select" id="filter-competition">
+            <option value="">全部比赛</option>
+          </select>
+        </label>
+        <label class="field">
+          <span class="label">项目</span>
+          <select class="select" id="filter-event" disabled>
+            <option value="">请先选择比赛</option>
+          </select>
+        </label>
+        <button class="btn btn-ghost" type="button" id="filter-reset">重置</button>
+      </div>
+      <p class="hint mt-3">
+        选择比赛与项目后可查看该项目的选手排行与全部单次成绩；
+        不选则显示最近通过审核的成绩。
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ 结果 ============ -->
+  <section class="section-tight">
+    <div class="wrap">
+      <div id="results-head" class="section-head"></div>
+      <div id="results-body"></div>
+    </div>
+  </section>
+
+  <!-- ============ 口径说明 ============ -->
+  <section class="section section-alt">
+    <div class="wrap wrap-narrow">
+      <div class="section-head">
+        <h2 class="section-title">成绩口径</h2>
+      </div>
+      <div class="prose">
+        <p>
+          <strong>最好单次</strong>取该选手在这个项目里的最小有效用时。
+          <strong>+2</strong> 罚时按用时加 2 秒计入，因此显示时会在数字后带一个加号。
+        </p>
+        <p>
+          <strong>DNF</strong>（未完成）与 <strong>DNS</strong>（未开始）不计入最好成绩，
+          也不计入有效次数，但会出现在明细里，以免成绩记录看起来缺了次数。
+        </p>
+        <p>
+          不同项目可能采用不同的算法（单次最好、去头尾平均、取最好 N 次、
+          低于某秒数的比例等），本项目页默认按<strong>最好单次</strong>排序。
+          需要看项目自身的算法结果时，请以项目配置为准。
+        </p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-name" id="foot-name">xssz 魔方非官方组织</div>
+        <p class="footer-note" id="foot-note"></p>
+      </div>
+      <div>
+        <div class="faint">相关链接</div>
+        <div class="footer-links mt-3" id="foot-links"></div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="foot-year">2026</span> <span id="foot-name-en"></span></span>
+      <span>本站由运营委员会维护</span>
+    </div>
+  </div>
+</footer>
+
+<div id="alert-box" class="alert" hidden></div>
+
+<script src="js/config.js"></script>
+<script src="js/session.js"></script>
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/content.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/site.js"></script>
+<script src="js/page-results.js"></script>
+</body>
+</html>

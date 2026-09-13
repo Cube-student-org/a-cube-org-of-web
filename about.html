@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>关于我们 · xssz 魔方非官方组织</title>
+<meta name="description" content="xssz 魔方非官方组织的简介、当前状态说明（「非官方」是什么意思）、整体组织形态、以及本站的公开范围。">
+<link rel="stylesheet" href="css/style.css">
+<!-- 首访门禁：必须在 <head> 内同步执行，才能赶在首帧之前把内容藏住。
+     放在样式表之后，脚本会等 CSS 就绪才跑，标记一定先于第一次绘制生效。
+     机制与理由见 js/consent.js 顶部注释。 -->
+<script src="js/consent.js"></script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%235B57D1'/%3E%3Ctext x='16' y='22' font-family='sans-serif' font-size='15' font-weight='700' fill='white' text-anchor='middle'%3Exz%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+
+<a class="skip-link" href="#main">跳到主要内容</a>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="index.html">
+      <span class="brand-mark" aria-hidden="true">xz</span>
+      <span class="brand-text">
+        <span class="brand-name">xssz 魔方非官方组织</span>
+        <span class="brand-sub">Unofficial Rubik's Cube Organization</span>
+      </span>
+    </a>
+    <button class="nav-toggle" id="nav-toggle" type="button"
+            aria-label="展开导航菜单" aria-expanded="false" aria-controls="site-nav">
+      <span class="nav-toggle-bar" aria-hidden="true"></span>
+    </button>
+    <nav class="nav" id="site-nav" aria-label="主导航">
+      <a class="nav-link" href="index.html" data-nav="index.html">首页</a>
+      <a class="nav-link" href="about.html" data-nav="about.html">关于我们</a>
+      <a class="nav-link" href="charter.html" data-nav="charter.html">章程与制度</a>
+      <a class="nav-link" href="events.html" data-nav="events.html">活动与赛事</a>
+      <a class="nav-link" href="results.html" data-nav="results.html">赛事成绩</a>
+      <div class="nav-auth" id="nav-auth"></div>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <div class="page-head">
+    <div class="wrap">
+      <p class="breadcrumb"><a href="index.html">首页</a><span>/</span>关于我们</p>
+      <h1>关于我们</h1>
+      <p class="lead">
+        一个由初中生自发组织起来的魔方团体。这一页说明我们是谁、
+        「非官方」这三个字到底指什么状态、以及我们是怎么组织起来的。
+      </p>
+    </div>
+  </div>
+
+  <!-- ============ 我们是谁 ============ -->
+  <section class="section">
+    <div class="wrap wrap-narrow">
+      <div class="section-head">
+        <h2 class="section-title">我们是谁</h2>
+      </div>
+      <div class="prose" id="intro"></div>
+    </div>
+  </section>
+
+  <!-- ============ 「非官方」是什么意思 ============ -->
+  <section class="section section-alt" id="status">
+    <div class="wrap wrap-narrow">
+      <div class="section-head">
+        <h2 class="section-title" id="status-heading">「非官方」是一种状态，不是自我贬低</h2>
+      </div>
+      <div class="prose" id="status-detail"></div>
+    </div>
+  </section>
+
+  <!-- ============ 组织架构 ============ -->
+  <section class="section" id="chart">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 class="section-title">我们是有组织的</h2>
+        <p class="section-desc">
+          这一节只讲整体的权力结构，不铺机构清单。
+          完整的机构设置、产生方式与职权边界都在章程正文里——那是权威版本，本页不复述。
+        </p>
+      </div>
+      <div id="org-chart"></div>
+      <div class="btn-row mt-5">
+        <a class="btn btn-ghost" href="charter.html#toc-section">去章程里看机构条款</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 权力如何被约束 ============ -->
+  <section class="section section-alt">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 class="section-title">权力如何被约束</h2>
+        <p class="section-desc">
+          章程不是给别人看的门面。下面四条是它生效以来一直在实际约束我们的机制。
+        </p>
+      </div>
+      <div class="grid grid-4" id="principles-about"></div>
+    </div>
+  </section>
+
+  <!-- ============ 条文编号机制 ============ -->
+  <section class="section">
+    <div class="wrap wrap-narrow">
+      <div class="section-head">
+        <h2 class="section-title" id="hash-heading">每条条文有一个永久编号</h2>
+      </div>
+      <div class="prose" id="hash-note"></div>
+    </div>
+  </section>
+
+  <!-- ============ 本站公开范围 ============ -->
+  <section class="section section-alt">
+    <div class="wrap wrap-narrow">
+      <div class="section-head">
+        <h2 class="section-title">本站公开什么、不公开什么</h2>
+        <p class="section-desc">
+          这一节描述的是网站本身的信息边界，不是章程条款。有疑问请联系运营委员会。
+        </p>
+      </div>
+
+      <div class="grid grid-2">
+        <div class="card">
+          <h3 class="card-title">公开</h3>
+          <p class="card-body">
+            组织名称与当前状态 · 章程目录与全文 · 组织形态概要 ·
+            活动与赛事记录 · 已通过审核的比赛成绩
+          </p>
+        </div>
+        <div class="card">
+          <h3 class="card-title">不公开</h3>
+          <p class="card-body">
+            成员的联系方式 · 账号信息 · 积分档案明细 · 未通过审核的成绩 ·
+            内部争议的处理过程
+          </p>
+        </div>
+      </div>
+
+      <p class="muted mt-4">
+        账号信息（用户ID、昵称、角色）仅在登录后对本人可见，管理员在用户管理中可见其管辖范围内的账号。
+        成绩的公开范围严格跟随审核状态：只有通过审核的成绩会出现在公开页面，
+        待审与已驳回的成绩仅提交者本人和审核员以上可见。
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ CTA ============ -->
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 class="section-title">接下来</h2>
+      </div>
+      <div class="btn-row">
+        <a class="btn btn-primary" href="charter.html">读章程全文</a>
+        <a class="btn btn-ghost" href="events.html">看我们办过的赛事</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-name" id="foot-name">xssz 魔方非官方组织</div>
+        <p class="footer-note" id="foot-note"></p>
+      </div>
+      <div>
+        <div class="faint">相关链接</div>
+        <div class="footer-links mt-3" id="foot-links"></div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="foot-year">2026</span> <span id="foot-name-en"></span></span>
+      <span>本站由运营委员会维护</span>
+    </div>
+  </div>
+</footer>
+
+<div id="alert-box" class="alert" hidden></div>
+
+<script src="js/config.js"></script>
+<script src="js/session.js"></script>
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/content.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/site.js"></script>
+<script src="js/page-about.js"></script>
+</body>
+</html>

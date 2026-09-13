@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>章程与制度 · xssz 魔方非官方组织</title>
+<meta name="description" content="xssz 魔方非官方组织规范文件：临时章程（14 章 71 条）与 4 份细则，严谨版与通俗版双文本，每条条文带永久编号（内容哈希）。含文件切换、目录、条文检索与全文。">
+<link rel="stylesheet" href="css/style.css">
+<!-- 首访门禁：必须在 <head> 内同步执行，才能赶在首帧之前把内容藏住。
+     放在样式表之后，脚本会等 CSS 就绪才跑，标记一定先于第一次绘制生效。
+     机制与理由见 js/consent.js 顶部注释。 -->
+<script src="js/consent.js"></script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%235B57D1'/%3E%3Ctext x='16' y='22' font-family='sans-serif' font-size='15' font-weight='700' fill='white' text-anchor='middle'%3Exz%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+
+<a class="skip-link" href="#main">跳到主要内容</a>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="index.html">
+      <span class="brand-mark" aria-hidden="true">xz</span>
+      <span class="brand-text">
+        <span class="brand-name">xssz 魔方非官方组织</span>
+        <span class="brand-sub">Unofficial Rubik's Cube Organization</span>
+      </span>
+    </a>
+    <button class="nav-toggle" id="nav-toggle" type="button"
+            aria-label="展开导航菜单" aria-expanded="false" aria-controls="site-nav">
+      <span class="nav-toggle-bar" aria-hidden="true"></span>
+    </button>
+    <nav class="nav" id="site-nav" aria-label="主导航">
+      <a class="nav-link" href="index.html" data-nav="index.html">首页</a>
+      <a class="nav-link" href="about.html" data-nav="about.html">关于我们</a>
+      <a class="nav-link" href="charter.html" data-nav="charter.html">章程与制度</a>
+      <a class="nav-link" href="events.html" data-nav="events.html">活动与赛事</a>
+      <a class="nav-link" href="results.html" data-nav="results.html">赛事成绩</a>
+      <div class="nav-auth" id="nav-auth"></div>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <div class="page-head">
+    <div class="wrap">
+      <p class="breadcrumb"><a href="index.html">首页</a><span>/</span>章程与制度</p>
+      <h1>章程与规范性文件</h1>
+      <p class="lead">
+        这是这个组织运行所依据的规则文本。它不是宣言，而是可以被引用、被援引、
+        被用来判定「某个机构这次做得对不对」的操作性文件。
+      </p>
+      <p class="lead-sub">
+        一共 5 份：<strong>临时章程</strong>是总纲，另有 4 份细则分管特殊身份、史料、
+        运营与事项分类。下面每一份都能切换着读，与本组织仓库里的文件是同一份文本。
+      </p>
+    </div>
+  </div>
+
+  <!-- ============ 读取中 ============ -->
+  <!-- 正文是异步读取的，先给一行即时反馈，免得人以为页面坏了；读到后由脚本收起 -->
+  <section class="section-tight" id="charter-loading">
+    <div class="wrap"><p class="muted">正在读取章程正文…</p></div>
+  </section>
+
+  <!-- ============ 元信息 ============ -->
+  <section class="section-tight">
+    <div class="wrap">
+      <div class="charter-meta" id="charter-meta"></div>
+      <p class="faint mt-4" id="charter-source-note"></p>
+    </div>
+  </section>
+
+  <!-- ============ 文件与版本 ============ -->
+  <!-- #charter-picker 是文件与版本两组按钮的共同容器：脚本只在它上面挂一个点击监听，
+       靠事件委托分辨点的是哪一组。所以两组按钮必须都在它里面。 -->
+  <section class="section section-alt" id="files">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 class="section-title">这里有几份文件</h2>
+        <p class="section-desc">
+          规范文件是一组，不是一份。主章程是总纲，四份细则分管具体事务。
+          选中哪一份，本页的目录、检索与全文就换成哪一份。
+        </p>
+      </div>
+
+      <div class="file-list" id="charter-overview"></div>
+
+      <div class="picker" id="charter-picker">
+        <div class="picker-block">
+          <div class="picker-label">规范性文件</div>
+          <div class="file-switch" id="charter-files" role="group" aria-label="选择规范性文件"></div>
+          <p class="ver-note" id="charter-file-note"></p>
+        </div>
+
+        <div class="picker-block">
+          <div class="picker-label">文本版本</div>
+          <div class="ver-switch" id="charter-version" role="group" aria-label="选择章程文本版本"></div>
+          <p class="ver-note" id="charter-version-note"></p>
+        </div>
+      </div>
+
+      <div class="prose mt-6">
+        <p>
+          每一份文件都有<strong>两种写法</strong>——这不是两个版本，是同一份规则的两个文本。
+          切换「文本版本」，本页的目录、检索与全文会一起换过去。
+        </p>
+        <p>
+          <strong>通俗版</strong>：以例子为核心、语言通俗，是日常陈述与执行的默认版本。
+          多数情形下直接采用通俗版。
+        </p>
+        <p>
+          <strong>严谨版</strong>：表述精确，用于特殊情形——正式决议、对外正式文件、
+          争议裁决、以及需要精确界定权责的场合。
+        </p>
+        <p>
+          <strong>替代执行</strong>：当严谨版缺失或不适用时，通俗版可替代严谨版执行，
+          即通俗版具有独立的可执行效力。
+        </p>
+        <p>
+          两版中同一条规则的条文编号（内容哈希）是<strong>同一个</strong>——哈希以严谨版正文
+          为基准计算。所以不论你读的是哪一版，引用同一个「#编号」指的都是同一条规则，
+          跨版本、跨文件的引用都不会歧义。你在这里选的文件与版本会被记住，下次打开直接是它们。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 目录 ============ -->
+  <section class="section" id="toc-section">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 class="section-title">目录</h2>
+        <p class="section-desc" id="toc-desc"></p>
+      </div>
+      <div class="toc" id="toc"></div>
+    </div>
+  </section>
+
+  <!-- ============ 检索 ============ -->
+  <section class="section section-alt">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 class="section-title">条文检索</h2>
+        <p class="section-desc">
+          在当前打开的这一份文件里检索：输入条号（如 14 或 第十四条）、
+          哈希（如 9a265b9b）或关键词，找到对应条文。换文件请用上面的选择器。
+        </p>
+      </div>
+
+      <div class="search-bar">
+        <label class="sr-only" for="charter-q">检索章程条文</label>
+        <input class="input" id="charter-q" type="search" placeholder="条号 / 哈希 / 关键词"
+               autocomplete="off">
+        <button class="btn btn-primary" type="button" id="charter-search-btn">检索</button>
+        <button class="btn btn-ghost" type="button" id="charter-clear-btn">清除</button>
+      </div>
+
+      <div class="mt-5" id="search-results"></div>
+    </div>
+  </section>
+
+  <!-- ============ 全文 ============ -->
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 class="section-title">全文</h2>
+        <p class="section-desc">
+          按章折叠，默认展开第一章；不分章的细则直接平铺全文。
+          条文右侧的灰色编号是它的内容哈希——条文的永久编号，跨版本、跨文件引用时用它。
+          条文正文里出现的「#编号」都可点击，直接跳到被引用的那一条
+          （细则引用主章程的条文时，会跳到主章程里对应的位置）。
+        </p>
+        <p class="faint mt-3">
+          两处排版说明：① 通俗版里以「&gt;」开头的举例，在本页以引用块呈现；
+          ② 原文中用于分段的分隔线与空行只是排版分隔，本页不重复呈现。
+          两处都只涉及呈现形式，条文文字未作增删。
+        </p>
+      </div>
+      <div id="charter-body"></div>
+    </div>
+  </section>
+
+  <!-- ============ 来源与下载 ============ -->
+  <section class="section section-alt">
+    <div class="wrap wrap-narrow">
+      <div class="section-head">
+        <h2 class="section-title">获取与引用</h2>
+        <p class="section-desc">
+          权威版本以组织仓库中的规范性文件为准，本站展示的是同一份文本的网页版，
+          逐字搬入、未作改写。两者若有出入，以仓库文件为准。
+        </p>
+        <p class="faint mt-3">
+          引用条文时，建议同时给出两样东西：条文的「#编号」（内容哈希，永久有效，
+          条文重新编号也不会变）与文本版本（通俗版／严谨版）。
+        </p>
+      </div>
+      <div class="footer-links" id="charter-sources"></div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-name" id="foot-name">xssz 魔方非官方组织</div>
+        <p class="footer-note" id="foot-note"></p>
+      </div>
+      <div>
+        <div class="faint">相关链接</div>
+        <div class="footer-links mt-3" id="foot-links"></div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="foot-year">2026</span> <span id="foot-name-en"></span></span>
+      <span>本站由运营委员会维护</span>
+    </div>
+  </div>
+</footer>
+
+<div id="alert-box" class="alert" hidden></div>
+
+<script src="js/config.js"></script>
+<script src="js/session.js"></script>
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<!-- 迷你 Markdown 渲染器：章程正文里的列表与加粗靠它，必须排在 page-charter.js 之前 -->
+<script src="js/md.js"></script>
+<script src="js/content.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/site.js"></script>
+<script src="js/page-charter.js"></script>
+</body>
+</html>
